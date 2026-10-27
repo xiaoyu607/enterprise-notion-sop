@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "company_name": "待配置企业",
+  "company_slug": "company-template",
+  "reference_date": "2026-10-27",
+  "departments": ["销售部", "设计部", "管理部"],
+  "review_cycle_days": 90,
+  "data": {
+    "roles": [],
+    "sops": [],
+    "processes": [],
+    "tasks": [],
+    "training": [],
+    "knowledge": [],
+    "changes": [],
+    "implementation": []
+  }
+}

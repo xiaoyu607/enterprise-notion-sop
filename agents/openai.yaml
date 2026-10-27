@@ -1,0 +1,6 @@
+interface:
+  display_name: "企业 Notion 管理工作"
+  short_description: "配置企业八类 SOP 数据库，分离演示与正式资料并生成 Notion 手动导入包"
+  default_prompt: "使用 $enterprise-notion-sop 整理企业资料、仅修改客户配置，生成并测试演示和正式 Notion 导入包，列出待人工配置与验收事项。"
+policy:
+  allow_implicit_invocation: true

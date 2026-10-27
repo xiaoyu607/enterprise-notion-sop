@@ -1,0 +1,43 @@
+name: Publish generic SOP template
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version in release.json, without v'
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: publish-sop-template
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
+      - name: Match version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: python -c 'import json,os; assert json.load(open("release.json"))["version"] == os.environ["VERSION"], "Version mismatch"'
+      - run: python tests/test_template.py
+      - name: Build only the public generic configuration
+        run: python build_template.py --config company_config.example.json --output "$RUNNER_TEMP/notion-bundles"
+      - name: Publish source and generic import ZIPs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          git archive --format=zip --prefix=enterprise-notion-sop/ HEAD --output="$RUNNER_TEMP/enterprise-notion-sop-source.zip"
+          bundles=("$RUNNER_TEMP/notion-bundles"/*/*.zip)
+          reports=("$RUNNER_TEMP/notion-bundles"/*/build_report.json)
+          test "${#bundles[@]}" -eq 2
+          gh release create "v$VERSION" "${bundles[@]}" "${reports[@]}" "$RUNNER_TEMP/enterprise-notion-sop-source.zip" --target "$GITHUB_SHA" --title "v$VERSION — Enterprise Notion SOP" --notes-file references/release-notes.md --prerelease
